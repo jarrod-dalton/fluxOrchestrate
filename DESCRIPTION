@@ -1,0 +1,21 @@
+Package: patientSimOrchestrate
+Type: Package
+Title: Multi-model orchestration for patientSim bundles
+Version: 0.1.0
+Author: Jarrod Dalton [aut, cre]
+Maintainer: Jarrod Dalton <jarrod.dalton@gmail.com>
+Authors@R: person(given = "Jarrod",
+                  family = "Dalton",
+                  role = c("aut", "cre"),
+                  email = "jarrod.dalton@gmail.com")
+Description: Add-on orchestration utilities for the patientSim ecosystem. Provides an
+    orchestration bundle wrapper that composes multiple ModelBundles on a
+    shared patient timeline, supports policy-based eligibility, deterministic
+    event precedence via process_id rewriting, and optional episode/care-
+    context transitions implemented as ordinary state updates.
+License: Proprietary
+Encoding: UTF-8
+Imports: patientSimCore, R6
+Suggests: testthat (>= 3.0.0), knitr, rmarkdown
+Config/testthat/edition: 3
+VignetteBuilder: knitr
