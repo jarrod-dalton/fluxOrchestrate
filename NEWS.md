@@ -1,3 +1,9 @@
+# patientSimOrchestrate 1.1.2
+
+- Fix parse/collate error in `toy_hospital_bundle.R`.
+- Make the toy hospital bundle use `patient$last_time` as the sole canonical time reference.
+- Strengthen regression test to construct patients under the toy bundle schema.
+
 # patientSimOrchestrate 1.1.1
 
 - Fix toy hospital bundle to anchor proposal times to patient$last_time (prevents non-monotone time updates).
