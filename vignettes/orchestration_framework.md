@@ -1,4 +1,3 @@
-\
 ---
 title: "patientSimOrchestrate: Orchestration framework"
 output: rmarkdown::html_vignette
