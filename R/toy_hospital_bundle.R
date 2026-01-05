@@ -36,6 +36,44 @@ schema <- list(
   )
 )
 
+  Toy hospitalization episode bundle (for orchestration demos and tests)
+#'
+#' This intentionally minimal model alternates between an outpatient state and an inpatient
+#' state by proposing either an admission event or a discharge event.
+#'
+#' The bundle is designed to demonstrate orchestration patterns, not clinical realism.
+#' It also provides a lightweight second model for patientSimOrchestrate unit tests.
+#'
+#' Default behavior (if `ctx$hosp_params` is not provided):
+#' - Admit time is generated as current_time + rexp(1, rate = 1 / admit_wait_mean)
+#' - Length of stay is generated as rexp(1, rate = 1 / los_mean)
+#'
+#' @param hosp_params Optional list with `admit_wait_mean` and `los_mean` (in model time units).
+#' @return A ModelBundle-compatible list.
+#' @export
+hospital_toy_bundle <- function(hosp_params = NULL) {
+  if (is.null(hosp_params)) hosp_params <- list(admit_wait_mean = 1.0, los_mean = 0.05)
+schema <- list(
+  care_mode = list(
+    type = "categorical",
+    levels = c("outpatient", "inpatient"),
+    default = "outpatient"
+  ),
+  in_hospital = list(
+      type = "binary",
+      levels = c("0", "1"),
+      default = "0"
+    ),
+  next_admit_time = list(
+    type = "continuous",
+    default = NA_real_
+  ),
+  next_discharge_time = list(
+    type = "continuous",
+    default = NA_real_
+  )
+)
+
   .get_time <- function(patient) {
     # patientSimCore does not treat 'time' as a schema var. Time is managed separately.
     # Prefer patient$state() if available, else fall back to patient$as_list() without 'time'.
@@ -50,7 +88,7 @@ schema <- list(
 
   propose_events <- function(patient, ctx = NULL, process_ids = NULL, current_proposals = NULL) {
     st <- patient$as_list(c("care_mode", "next_admit_time", "next_discharge_time"))
-    t_now <- .get_time(patient)
+    t_now <- (if (is.null(patient$last_time)) 0 else as.numeric(patient$last_time))
     mode  <- st$care_mode
 
     want_pid <- function(pid) is.null(process_ids) || pid %in% process_ids
@@ -86,7 +124,7 @@ schema <- list(
   }
 
   transition <- function(patient, event, ctx = NULL) {
-    t_now <- .get_time(patient)
+    t_now <- (if (is.null(patient$last_time)) 0 else as.numeric(patient$last_time))
 
     params <- hosp_params
     if (!is.null(ctx) && is.list(ctx) && !is.null(ctx$hosp_params)) {
