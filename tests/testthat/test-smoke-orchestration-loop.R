@@ -1,12 +1,9 @@
 test_that("orchestrated bundle can advance through multiple events with gating", {
   # Helper: retrieve current time in a Core-compatible way
   get_time <- function(patient) {
-    # patientSimCore may expose time via $last_time or via patient$state()
-    if (!is.null(patient$last_time)) return(patient$last_time)
-    st <- tryCatch(patient$state(), error = function(e) NULL)
-    if (is.list(st) && "time" %in% names(st)) return(st$time)
-    if (is.list(st) && !is.null(st$current) && "time" %in% names(st$current)) return(st$current$time)
-    NA_real_
+    # Time is engine-owned; always use patient$last_time (not part of state()).
+    if (is.null(patient$last_time)) return(NA_real_)
+    patient$last_time
   }
 
   hosp <- hospital_toy_bundle(hosp_params = list(admit_wait_mean = 0.5, los_mean = 0.1))
