@@ -1,3 +1,7 @@
+## 1.2.0
+
+- Version bump to align with patientSim ecosystem v1.2.0. No functional changes.
+
 # 1.1.4 (2026-01-06)
 
 - Expanded orchestration process_id priority prefix to 6 digits for deterministic ordering.
