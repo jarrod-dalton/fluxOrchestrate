@@ -15,7 +15,7 @@ priority_pid <- function(priority, model_id, sub_pid) {
   if (is.na(priority)) stop("priority must be coercible to integer.")
   model_id <- as.character(model_id)
   sub_pid  <- as.character(sub_pid)
-  sprintf("%03d|%s|%s", priority, model_id, sub_pid)
+  sprintf("%06d|%s|%s", priority, model_id, sub_pid)
 }
 
 #' Parse precedence-encoded process ids

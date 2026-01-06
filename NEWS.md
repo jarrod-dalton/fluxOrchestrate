@@ -1,3 +1,7 @@
+# 1.1.4 (2026-01-06)
+
+- Expanded orchestration process_id priority prefix to 6 digits for deterministic ordering.
+
 # patientSimOrchestrate 1.1.2
 
 - Fix parse/collate error in `toy_hospital_bundle.R`.
