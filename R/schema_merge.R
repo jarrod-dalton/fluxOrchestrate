@@ -9,9 +9,23 @@
 #' @export
 merge_schemas_strict <- function(...) {
   schemas <- list(...)
+
+  is_schema <- function(x) {
+    # A schema is a *named* list whose entries are variable specs (lists)
+    # containing at least $default and $type.
+    is.list(x) && !is.null(names(x)) && length(x) > 0L &&
+      all(vapply(x, is.list, logical(1))) &&
+      all(vapply(x, function(spec) !is.null(spec$default), logical(1))) &&
+      all(vapply(x, function(spec) !is.null(spec$type), logical(1)))
+  }
+
   if (length(schemas) == 1L && is.list(schemas[[1]]) && is.null(names(schemas))) {
-    # allow merge_schemas_strict(list_of_schemas)
-    schemas <- schemas[[1]]
+    # Allow merge_schemas_strict(list_of_schemas) where list_of_schemas is a list
+    # of *schemas* (each itself a named list of variable specs). Do not unwrap
+    # when a single schema is provided.
+    if (!is_schema(schemas[[1]]) && length(schemas[[1]]) > 0L && all(vapply(schemas[[1]], is_schema, logical(1)))) {
+      schemas <- schemas[[1]]
+    }
   }
 
   if (!length(schemas)) stop("No schemas provided.")
@@ -30,8 +44,13 @@ merge_schemas_strict <- function(...) {
   }
 
   for (s in schemas) {
-    if (is.null(s) || !is.list(s)) stop("Each schema must be a named list (like default_patient_schema()).")
-    if (is.null(names(s)) || any(names(s) == "")) stop("Each schema must be a named list with non-empty names.")
+    if (is.null(s) || !is.list(s)) {
+      stop("Each schema must be a named list (like default_patient_schema()).")
+    }
+
+    # Centralize schema contract enforcement in patientSimCore.
+    # This also normalizes type metadata (e.g., case, allowed set).
+    s <- patientSimCore::ps_schema_validate(s)
 
     for (nm in names(s)) {
       if (is.null(out[[nm]])) {

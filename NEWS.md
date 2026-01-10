@@ -1,3 +1,12 @@
+## 1.3.0
+
+- Coordinated ecosystem release v1.3.0.
+- Schema validation and schema helper workflows are consolidated to `patientSimCore`.
+
+## 1.2.2
+
+- Centralize schema handshake: orchestrate schema merging now validates input schemas via `patientSimCore::ps_schema_validate()` before merging, preventing drift from the Core schema contract.
+
 ## 1.2.1
 
 - Guard: orchestrated bundle enforces numeric model time for patient$last_time and all proposal time_next values. Calendar time inputs (Date/POSIXct) now error with a message that includes ctx$time$unit when available.
