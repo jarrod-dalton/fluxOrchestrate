@@ -1,3 +1,7 @@
+## 1.2.1
+
+- Guard: orchestrated bundle enforces numeric model time for patient$last_time and all proposal time_next values. Calendar time inputs (Date/POSIXct) now error with a message that includes ctx$time$unit when available.
+
 ## 1.2.0
 
 - Version bump to align with patientSim ecosystem v1.2.0. No functional changes.

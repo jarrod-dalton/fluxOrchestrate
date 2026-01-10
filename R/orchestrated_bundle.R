@@ -96,6 +96,9 @@ schema <- merge_schemas_strict(c(list(core_schema), model_schemas))
   }
 
   propose_events <- function(patient, ctx = NULL, process_ids = NULL, current_proposals = NULL) {
+    # Orchestration operates strictly on numeric model time.
+    .pso_assert_numeric_scalar(patient$last_time, name = "patient$last_time", ctx = ctx)
+
     eligible <- pol$eligible_models(patient, ctx)
     eligible <- intersect(eligible, names(models))
     if (!length(eligible)) return(list())
@@ -120,6 +123,7 @@ schema <- merge_schemas_strict(c(list(core_schema), model_schemas))
 
       for (spid in names(props)) {
         p <- props[[spid]]
+        .pso_assert_proposal_time_next(p, ctx = ctx)
         pr <- pol$event_priority(p, patient, ctx)
         orch_pid <- priority_pid(pr, mid, spid)
         out[[orch_pid]] <- add_meta(p, orch_pid, mid, spid, pr)
