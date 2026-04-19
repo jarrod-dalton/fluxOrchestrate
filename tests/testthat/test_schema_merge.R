@@ -5,7 +5,7 @@ test_that("merge_schemas_strict errors on conflicts", {
 })
 
 test_that("merge_schemas_strict defers schema validation to Core", {
-  # Missing required schema metadata (type) should error via patientSimCore::ps_schema_validate
+  # Missing required schema metadata (type) should error via patientSimCore::schema_validate
   bad <- list(x = list(default = 0))
   expect_error(merge_schemas_strict(bad), "must define \\$type")
 })

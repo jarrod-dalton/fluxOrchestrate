@@ -1,24 +1,3 @@
-#' Create an orchestration bundle over multiple model bundles
-#'
-#' Returns a ModelBundle-compatible list of functions (per patientSimCore) that composes
-#' multiple underlying bundles on a shared patient timeline. Orchestration is implemented
-#' as an add-on wrapper: the Core Engine remains unchanged.
-#'
-#' Core idea: sub-models *propose* candidate next events. The engine selects the single
-#' next event globally (earliest time; deterministic tie-break by `process_id`). Orchestration controls:
-#' - which models are allowed to propose (eligibility gating)
-#' - deterministic precedence among same-time events (priority encoding into `process_id`)
-#' - optional cross-model payload updates after transitions (policy-driven)
-#'
-#' @param models Named list of model bundles (each bundle is a list with patientSimCore bundle functions).
-#' @param policy List of callbacks. Any missing callbacks fall back to defaults.
-#'   - `eligible_models(patient, ctx)` -> character vector of model ids (subset of names(models))
-#'   - `event_priority(proposal, patient, ctx)` -> integer (lower = higher priority)
-#'   - `on_transition(event, patient, ctx, model_changes)` -> additional changes (named list)
-#'   - `stop(patient, event, ctx, per_model_stop)` -> TRUE/FALSE
-#' @param schema Optional universal schema. If NULL, merges core default schema with model schemas when available.
-#' @return A ModelBundle-compatible list.
-#' @export
 orchestrated_bundle <- function(models,
                                policy = NULL,
                                schema = NULL) {

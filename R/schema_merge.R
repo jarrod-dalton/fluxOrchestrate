@@ -1,12 +1,3 @@
-#' Strictly merge patient schemas
-#'
-#' Schemas in patientSimCore are named lists where each element is a list describing a
-#' state variable (type/levels/default/coerce/validate/blocks/etc.). This helper merges
-#' multiple schemas and errors on any conflicting definition for a shared variable name.
-#'
-#' @param ... Named or unnamed schema objects (named lists).
-#' @return A merged schema (named list).
-#' @export
 merge_schemas_strict <- function(...) {
   schemas <- list(...)
 
@@ -50,7 +41,7 @@ merge_schemas_strict <- function(...) {
 
     # Centralize schema contract enforcement in patientSimCore.
     # This also normalizes type metadata (e.g., case, allowed set).
-    s <- patientSimCore::ps_schema_validate(s)
+    s <- patientSimCore::schema_validate(s)
 
     for (nm in names(s)) {
       if (is.null(out[[nm]])) {
