@@ -1,0 +1,14 @@
+\name{priority_pid}
+\alias{priority_pid}
+\title{Build a precedence-encoded process ID}
+\usage{priority_pid(priority, model_id, sub_pid)}
+\arguments{
+\item{priority}{Integer priority (lower values sort earlier).}
+\item{model_id}{Model identifier string.}
+\item{sub_pid}{Underlying process ID string within the model.}
+}
+\value{A character scalar process ID in encoded form.}
+\description{
+Encodes priority and routing metadata into a stable process ID string used by
+orchestrated bundles.
+}

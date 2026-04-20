@@ -1,4 +1,4 @@
-# patientSimOrchestrate NAMESPACE (manual)
+# fluxOrchestrate NAMESPACE (manual)
 
 export(orchestrated_bundle)
 export(merge_schemas_strict)

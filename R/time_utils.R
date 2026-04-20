@@ -15,7 +15,7 @@
     unit <- .pso_time_unit_label(ctx)
     stop(
       sprintf(
-        "%s must be numeric model time (unit: '%s'). Calendar time inputs are out of scope for patientSimOrchestrate.",
+        "%s must be numeric model time (unit: '%s'). Calendar time inputs are out of scope for fluxOrchestrate.",
         name, unit
       ),
       call. = FALSE

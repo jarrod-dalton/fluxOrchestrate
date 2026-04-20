@@ -1,6 +1,6 @@
-# patientSimOrchestrate
+# fluxOrchestrate
 
-Add-on multi-model orchestration for the **patientSim** ecosystem.
+Add-on multi-model orchestration for the **flux** ecosystem.
 
 ## What this package provides
 
@@ -8,7 +8,7 @@ Add-on multi-model orchestration for the **patientSim** ecosystem.
 - deterministic event precedence via process id rewriting
 - strict schema merging with conflict detection
 
-This package is designed so that single-model users can continue using **patientSimCore**
+This package is designed so that single-model users can continue using **fluxCore**
 without pulling in orchestration-specific abstractions.
 
 

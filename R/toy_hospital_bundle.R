@@ -7,8 +7,8 @@
 #   admission and discharge events.
 #
 # Time semantics (LOCKED):
-#   patientSimCore treats time as engine metadata, not a schema state var.
-#   The canonical time reference is `patient$last_time`.
+#   fluxCore treats time as engine metadata, not a schema state var.
+#   The canonical time reference is `entity$last_time`.
 # ------------------------------------------------------------------------------
 
 hospital_toy_bundle <- function(hosp_params = NULL) {
@@ -35,9 +35,9 @@ hospital_toy_bundle <- function(hosp_params = NULL) {
     )
   )
 
-  propose_events <- function(patient, ctx = NULL, process_ids = NULL, current_proposals = NULL) {
-    st <- patient$as_list(c("care_mode", "next_admit_time", "next_discharge_time"))
-    t_now <- if (is.null(patient$last_time)) 0 else as.numeric(patient$last_time)
+  propose_events <- function(entity, ctx = NULL, process_ids = NULL, current_proposals = NULL) {
+    st <- entity$as_list(c("care_mode", "next_admit_time", "next_discharge_time"))
+    t_now <- if (is.null(entity$last_time)) 0 else as.numeric(entity$last_time)
     mode <- st$care_mode
 
     want_pid <- function(pid) is.null(process_ids) || pid %in% process_ids
@@ -56,7 +56,7 @@ hospital_toy_bundle <- function(hosp_params = NULL) {
 
     params <- hosp_params
     if (!is.null(ctx) && is.list(ctx) && !is.null(ctx$hosp_params)) {
-      params <- modifyList(params, ctx$hosp_params)
+      params <- utils::modifyList(params, ctx$hosp_params)
     }
 
     if (identical(mode, "outpatient")) {
@@ -76,8 +76,8 @@ hospital_toy_bundle <- function(hosp_params = NULL) {
     }
   }
 
-  transition <- function(patient, event, ctx = NULL) {
-    t_now <- if (is.null(patient$last_time)) 0 else as.numeric(patient$last_time)
+  transition <- function(entity, event, ctx = NULL) {
+    t_now <- if (is.null(entity$last_time)) 0 else as.numeric(entity$last_time)
 
     if (identical(event$event_type, "admit")) {
       list(
@@ -98,7 +98,7 @@ hospital_toy_bundle <- function(hosp_params = NULL) {
     }
   }
 
-  stop <- function(patient, event = NULL, ctx = NULL) FALSE
+  stop <- function(entity, event = NULL, ctx = NULL) FALSE
 
   list(
     name = "toy_hospital",

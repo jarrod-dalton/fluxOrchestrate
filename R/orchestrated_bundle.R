@@ -6,12 +6,12 @@ orchestrated_bundle <- function(models,
   }
 
   pol_default <- list(
-    eligible_models = function(patient, ctx = NULL) names(models),
-    event_priority  = function(proposal, patient, ctx = NULL) 500L,
-    on_transition   = function(event, patient, ctx = NULL, model_changes) list(),
-    stop            = function(patient, event = NULL, ctx = NULL, per_model_stop = NULL) {
+    eligible_models = function(entity, ctx = NULL) names(models),
+    event_priority  = function(proposal, entity, ctx = NULL) 500L,
+    on_transition   = function(event, entity, ctx = NULL, model_changes) list(),
+    stop            = function(entity, event = NULL, ctx = NULL, per_model_stop = NULL) {
       alive <- NA
-      st <- tryCatch(patient$as_list("alive"), error = function(e) NULL)
+      st <- tryCatch(entity$as_list("alive"), error = function(e) NULL)
       if (!is.null(st) && "alive" %in% names(st)) alive <- st$alive
       if (!is.na(alive) && !isTRUE(alive)) return(TRUE)
 
@@ -24,10 +24,10 @@ orchestrated_bundle <- function(models,
 
   if (is.null(policy)) policy <- list()
   if (!is.list(policy)) stop("policy must be a list.")
-  pol <- modifyList(pol_default, policy)
+  pol <- utils::modifyList(pol_default, policy)
 
   if (is.null(schema)) {
-    core_schema <- patientSimCore::default_patient_schema()
+    core_schema <- fluxCore::default_entity_schema()
     model_schemas <- lapply(models, function(b) {
   s <- NULL
   if (is.list(b) && !is.null(b$schema)) s <- b$schema
@@ -74,11 +74,11 @@ schema <- merge_schemas_strict(c(list(core_schema), model_schemas))
     prop
   }
 
-  propose_events <- function(patient, ctx = NULL, process_ids = NULL, current_proposals = NULL) {
+  propose_events <- function(entity, ctx = NULL, process_ids = NULL, current_proposals = NULL) {
     # Orchestration operates strictly on numeric model time.
-    .pso_assert_numeric_scalar(patient$last_time, name = "patient$last_time", ctx = ctx)
+    .pso_assert_numeric_scalar(entity$last_time, name = "entity$last_time", ctx = ctx)
 
-    eligible <- pol$eligible_models(patient, ctx)
+    eligible <- pol$eligible_models(entity, ctx)
     eligible <- intersect(eligible, names(models))
     if (!length(eligible)) return(list())
 
@@ -93,7 +93,7 @@ schema <- merge_schemas_strict(c(list(core_schema), model_schemas))
       sub_pids <- if (is.null(process_ids)) NULL else pids_by_model[[mid]]
 
       props <- b$propose_events(
-        patient = patient,
+        entity = entity,
         ctx = ctx,
         process_ids = sub_pids,
         current_proposals = sub_current
@@ -103,7 +103,7 @@ schema <- merge_schemas_strict(c(list(core_schema), model_schemas))
       for (spid in names(props)) {
         p <- props[[spid]]
         .pso_assert_proposal_time_next(p, ctx = ctx)
-        pr <- pol$event_priority(p, patient, ctx)
+        pr <- pol$event_priority(p, entity, ctx)
         orch_pid <- priority_pid(pr, mid, spid)
         out[[orch_pid]] <- add_meta(p, orch_pid, mid, spid, pr)
       }
@@ -112,7 +112,7 @@ schema <- merge_schemas_strict(c(list(core_schema), model_schemas))
     out
   }
 
-  transition <- function(patient, event, ctx = NULL) {
+  transition <- function(entity, event, ctx = NULL) {
     mid <- event$model_id
     spid <- event$sub_pid
     if (is.null(mid) || is.null(spid)) {
@@ -131,27 +131,27 @@ schema <- merge_schemas_strict(c(list(core_schema), model_schemas))
 
     model_changes <- list()
     if (!is.null(b$transition)) {
-      model_changes <- b$transition(patient = patient, event = event, ctx = ctx)
+      model_changes <- b$transition(entity = entity, event = event, ctx = ctx)
       if (is.null(model_changes)) model_changes <- list()
     }
 
-    extra <- pol$on_transition(event, patient, ctx, model_changes)
+    extra <- pol$on_transition(event, entity, ctx, model_changes)
     if (is.null(extra)) extra <- list()
 
     c(model_changes, extra)
   }
 
-  stop <- function(patient, event = NULL, ctx = NULL) {
-    eligible <- pol$eligible_models(patient, ctx)
+  stop <- function(entity, event = NULL, ctx = NULL) {
+    eligible <- pol$eligible_models(entity, ctx)
     eligible <- intersect(eligible, names(models))
 
     per_model <- list()
     for (mid in eligible) {
       b <- models[[mid]]
-      per_model[[mid]] <- if (!is.null(b$stop)) isTRUE(b$stop(patient = patient, event = event, ctx = ctx)) else FALSE
+      per_model[[mid]] <- if (!is.null(b$stop)) isTRUE(b$stop(entity = entity, event = event, ctx = ctx)) else FALSE
     }
 
-    isTRUE(pol$stop(patient, event, ctx, per_model))
+    isTRUE(pol$stop(entity, event, ctx, per_model))
   }
 
   list(

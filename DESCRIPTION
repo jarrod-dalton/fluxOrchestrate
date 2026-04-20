@@ -1,20 +1,20 @@
-Package: patientSimOrchestrate
+Package: fluxOrchestrate
 Type: Package
-Title: Multi-model orchestration for patientSim bundles
-Version: 1.4.0
+Title: Multi-model orchestration for flux bundles
+Version: 1.5.0
 Author: Jarrod Dalton [aut, cre]
 Maintainer: Jarrod Dalton <daltonj@ccf.org>
 Authors@R: person(given = "Jarrod",
                   family = "Dalton",
                   role = c("aut", "cre"),
                   email = "daltonj@ccf.org")
-Description: Add-on orchestration utilities for the patientSim ecosystem. Provides an
+Description: Add-on orchestration utilities for the flux ecosystem. Provides an
     orchestration bundle wrapper that composes multiple ModelBundles on a
-    shared patient timeline, supports policy-based eligibility, deterministic
+    shared entity timeline, supports policy-based eligibility, deterministic
     event precedence via process_id rewriting, and optional episode/care-
     context transitions implemented as ordinary state updates.
-License: Proprietary
+License: LGPL-3
 Encoding: UTF-8
-Imports: patientSimCore, R6
+Imports: fluxCore (>= 1.5.0)
 Suggests: testthat (>= 3.0.0)
 Config/testthat/edition: 3

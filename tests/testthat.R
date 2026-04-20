@@ -1,4 +1,4 @@
 library(testthat)
-library(patientSimOrchestrate)
+library(fluxOrchestrate)
 
-test_check("patientSimOrchestrate")
+test_check("fluxOrchestrate")

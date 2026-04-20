@@ -1,8 +1,8 @@
 ---
-title: "patientSimOrchestrate: Orchestration framework"
+title: "fluxOrchestrate: Orchestration framework"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{patientSimOrchestrate: Orchestration framework}
+  %\VignetteIndexEntry{fluxOrchestrate: Orchestration framework}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -11,9 +11,9 @@ vignette: >
 knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
 ```
 
-## What orchestration means in the patientSim ecosystem
+## What orchestration means in the flux ecosystem
 
-In **patientSimCore**, a simulation run advances by repeatedly:
+In **fluxCore**, a simulation run advances by repeatedly:
 
 1. asking a *bundle* to **propose** candidate next events (a "menu" of options),
 2. selecting the **single** next event globally (earliest time; deterministic tie-break by `process_id`),
@@ -22,7 +22,7 @@ In **patientSimCore**, a simulation run advances by repeatedly:
 A *proposal* is **not** an event that has happened. It is a candidate event that *could* happen next,
 including its proposed time and payload (what the event is and anything needed to apply it).
 
-Orchestration extends this to multiple sub-models (bundles) that share a single patient state and a
+Orchestration extends this to multiple sub-models (bundles) that share a single entity state and a
 single timeline, while keeping the Core engine unchanged.
 
 ## Policy-driven orchestration
@@ -36,10 +36,10 @@ single timeline, while keeping the Core engine unchanged.
 
 ### Eligibility gating (lock-out)
 
-If a patient is hospitalized, you may want to avoid evaluating proposals from an outpatient chronic
+If an entity is hospitalized, you may want to avoid evaluating proposals from an outpatient chronic
 disease model. Use:
 
-- `policy$eligible_models(patient, ctx)` to return only the hospital model while inpatient.
+- `policy$eligible_models(entity, ctx)` to return only the hospital model while inpatient.
 
 This both (a) prevents irrelevant event competition and (b) saves computation, because ineligible
 models are not called.
@@ -58,7 +58,7 @@ Lower `priority` values sort earlier and therefore win ties deterministically.
 Sub-models can propose events *sparsely*:
 
 - **Option A** (proposal caching): reuse `current_proposals` when still valid
-- **Option B** (state cursors): store "next scheduled time" in patient state (e.g., `next_followup_time`)
+- **Option B** (state cursors): store "next scheduled time" in entity state (e.g., `next_followup_time`)
 
 Orchestration is compatible with both. In practice:
 - gating (eligibility) is the biggest win during episodes (e.g., inpatient stays),
@@ -75,31 +75,31 @@ This package provides `hospital_toy_bundle()` as a minimal episode model:
 It is intentionally simple and useful for unit tests and demonstrations.
 
 ```{r eval=FALSE}
-library(patientSimCore)
-library(patientSimOrchestrate)
+library(fluxCore)
+library(fluxOrchestrate)
 
 hosp <- hospital_toy_bundle()
 
-# A placeholder chronic model bundle (your real use case would be patientSimASCVD)
+# A placeholder chronic model bundle (your real use case would be fluxASCVD)
 chronic <- list(
   name = "chronic",
   schema = list(),
-  propose_events = function(patient, ctx=NULL, process_ids=NULL, current_proposals=NULL) {
-    list(routine = list(event_type="clinic_visit", time_next = patient$as_list("time")$time + 0.5))
+  propose_events = function(entity, ctx=NULL, process_ids=NULL, current_proposals=NULL) {
+    list(routine = list(event_type="clinic_visit", time_next = entity$as_list("time")$time + 0.5))
   },
-  transition = function(patient, event, ctx=NULL) list(),
-  stop = function(patient, event=NULL, ctx=NULL) FALSE
+  transition = function(entity, event, ctx=NULL) list(),
+  stop = function(entity, event=NULL, ctx=NULL) FALSE
 )
 
 bundle <- orchestrated_bundle(
   models = list(hosp = hosp, chronic = chronic),
   policy = list(
-    eligible_models = function(patient, ctx=NULL) {
-      mode <- patient$as_list("care_mode")$care_mode
+    eligible_models = function(entity, ctx=NULL) {
+      mode <- entity$as_list("care_mode")$care_mode
       if (mode == "inpatient") return("hosp")
       c("hosp","chronic")
     },
-    event_priority = function(proposal, patient, ctx=NULL) {
+    event_priority = function(proposal, entity, ctx=NULL) {
       if (proposal$event_type %in% c("admit","discharge")) return(10L)
       200L
     }
@@ -116,5 +116,5 @@ A common design choice is what happens to a scheduled outpatient clinic visit du
 - **Pattern 3 (teachable advanced)**: add a *separate* post-discharge follow-up process (e.g., a 1-week
   visit) that activates only after discharge, while leaving the routine schedule unchanged.
 
-The patientSim ecosystem typically demonstrates Pattern 1 first to teach the core orchestration mechanics,
+The flux ecosystem typically demonstrates Pattern 1 first to teach the core orchestration mechanics,
 and then introduces Pattern 3 to show clean, explicit multi-process scheduling.

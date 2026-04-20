@@ -36,12 +36,12 @@ merge_schemas_strict <- function(...) {
 
   for (s in schemas) {
     if (is.null(s) || !is.list(s)) {
-      stop("Each schema must be a named list (like default_patient_schema()).")
+      stop("Each schema must be a named list (like default_entity_schema()).")
     }
 
-    # Centralize schema contract enforcement in patientSimCore.
+    # Centralize schema contract enforcement in fluxCore.
     # This also normalizes type metadata (e.g., case, allowed set).
-    s <- patientSimCore::schema_validate(s)
+    s <- fluxCore::schema_validate(s)
 
     for (nm in names(s)) {
       if (is.null(out[[nm]])) {
