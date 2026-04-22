@@ -1,3 +1,9 @@
+## 1.7.0
+
+- Coordinated ecosystem release alignment to version 1.7.0.
+- Dependency floor updated to `fluxCore (>= 1.7.0)`.
+- No functional changes in orchestration behavior.
+
 ## 1.5.0
 
 - check() note cleanup: namespaced utils::modifyList calls and dependency cleanup.
