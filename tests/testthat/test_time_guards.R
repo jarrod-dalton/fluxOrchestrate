@@ -4,7 +4,9 @@ library(fluxOrchestrate)
 test_that("orchestrated_bundle rejects calendar time proposals", {
   bad_model <- list(
     name = "bad",
-    schema = list(),
+    schema = list(
+      care_mode = list(type = "categorical", levels = c("outpatient", "inpatient"), default = "outpatient")
+    ),
     propose_events = function(entity, ctx = NULL, process_ids = NULL, current_proposals = NULL) {
       list(p = list(event_type = "x", time_next = as.Date("2000-01-01")))
     },
@@ -14,7 +16,7 @@ test_that("orchestrated_bundle rejects calendar time proposals", {
 
   b <- orchestrated_bundle(models = list(bad = bad_model))
 
-  p <- fluxCore::new_entity(init = list(), schema = b$schema, time0 = 0)
+  p <- fluxCore::Entity$new(init = list(), schema = b$schema, time0 = 0)
 
   expect_error(
     b$propose_events(p, ctx = list(time = list(unit = "days"))),

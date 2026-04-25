@@ -1,7 +1,9 @@
 test_that("eligible_models can lock out other models (no propose_events call)", {
   bad_model <- list(
     name = "bad_model",
-    schema = list(),
+    schema = list(
+      care_mode = list(type = "categorical", levels = c("outpatient", "inpatient"), default = "outpatient")
+    ),
     propose_events = function(entity, ctx=NULL, process_ids=NULL, current_proposals=NULL) {
       stop("bad_model should not be called")
     },
@@ -22,7 +24,7 @@ test_that("eligible_models can lock out other models (no propose_events call)", 
     )
   )
 
-  p <- fluxCore::new_entity(init = list(care_mode = "inpatient"), schema = b$schema, time0 = 0)
+  p <- fluxCore::Entity$new(init = list(care_mode = "inpatient"), schema = b$schema, time0 = 0)
 
   props <- b$propose_events(p, ctx = list())
   expect_true(length(props) > 0)

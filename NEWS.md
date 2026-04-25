@@ -1,3 +1,9 @@
+## 1.9.0
+
+- Coordinated ecosystem release alignment to version 1.9.0.
+- Removed implicit orchestration assumptions around `alive`/`active_followup` in schema merge defaults and docs; `orchestrated_bundle(schema = NULL)` now merges only supplied model schemas.
+- Dependency floor updated to `fluxCore (>= 1.9.0)`.
+
 ## 1.8.0
 
 - Coordinated ecosystem release alignment to version 1.8.0.

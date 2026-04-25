@@ -45,7 +45,7 @@ test_that("orchestrated bundle can advance through multiple events with gating",
     )
   )
 
-  p <- fluxCore::new_entity(init = list(care_mode = "outpatient"), schema = b$schema, time0 = 0)
+  p <- fluxCore::Entity$new(init = list(care_mode = "outpatient"), schema = b$schema, time0 = 0)
 
   times <- c()
   modes <- c()

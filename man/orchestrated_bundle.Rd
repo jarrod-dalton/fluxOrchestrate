@@ -7,7 +7,7 @@
 \item{policy}{Optional list overriding orchestration hooks such as
 \code{eligible_models}, \code{event_priority}, \code{on_transition}, and \code{stop}.}
 \item{schema}{Optional pre-merged schema. If \code{NULL}, schemas are merged from
-\code{fluxCore::default_entity_schema()} and model bundle schemas.}
+model bundle schemas.}
 }
 \value{A model bundle list compatible with \code{fluxCore::Engine}.}
 \description{

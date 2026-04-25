@@ -36,7 +36,7 @@ merge_schemas_strict <- function(...) {
 
   for (s in schemas) {
     if (is.null(s) || !is.list(s)) {
-      stop("Each schema must be a named list (like default_entity_schema()).")
+      stop("Each schema must be a named list of variable specifications.")
     }
 
     # Centralize schema contract enforcement in fluxCore.

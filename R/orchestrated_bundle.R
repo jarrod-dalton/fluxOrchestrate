@@ -10,11 +10,6 @@ orchestrated_bundle <- function(models,
     event_priority  = function(proposal, entity, ctx = NULL) 500L,
     on_transition   = function(event, entity, ctx = NULL, model_changes) list(),
     stop            = function(entity, event = NULL, ctx = NULL, per_model_stop = NULL) {
-      alive <- NA
-      st <- tryCatch(entity$as_list("alive"), error = function(e) NULL)
-      if (!is.null(st) && "alive" %in% names(st)) alive <- st$alive
-      if (!is.na(alive) && !isTRUE(alive)) return(TRUE)
-
       if (is.null(per_model_stop)) return(FALSE)
       eligible <- names(per_model_stop)
       if (!length(eligible)) return(FALSE)
@@ -27,19 +22,19 @@ orchestrated_bundle <- function(models,
   pol <- utils::modifyList(pol_default, policy)
 
   if (is.null(schema)) {
-    core_schema <- fluxCore::default_entity_schema()
     model_schemas <- lapply(models, function(b) {
-  s <- NULL
-  if (is.list(b) && !is.null(b$schema)) s <- b$schema
-  if (is.null(s)) return(NULL)
-  # allow models to omit schema (or provide empty list) without breaking orchestration
-  if (!is.list(s) || !length(s)) return(NULL)
-  if (is.null(names(s)) || any(names(s) == "")) return(NULL)
-  s
-})
-model_schemas <- Filter(Negate(is.null), model_schemas)
-
-schema <- merge_schemas_strict(c(list(core_schema), model_schemas))
+      s <- NULL
+      if (is.list(b) && !is.null(b$schema)) s <- b$schema
+      if (is.null(s)) return(NULL)
+      if (!is.list(s) || !length(s)) return(NULL)
+      if (is.null(names(s)) || any(names(s) == "")) return(NULL)
+      s
+    })
+    model_schemas <- Filter(Negate(is.null), model_schemas)
+    if (length(model_schemas) == 0L) {
+      stop("schema is NULL and no non-empty model schemas were supplied; provide `schema` or model bundle schemas.")
+    }
+    schema <- merge_schemas_strict(model_schemas)
   }
 
   split_by_model <- function(x_named) {
