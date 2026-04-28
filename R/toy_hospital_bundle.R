@@ -26,12 +26,14 @@ hospital_toy_bundle <- function(hosp_params = NULL) {
       default = "0"
     ),
     next_admit_time = list(
-      type = "continuous",
-      default = NA_real_
+      type = "numeric",
+      default = NA_real_,
+      allow_na = TRUE
     ),
     next_discharge_time = list(
-      type = "continuous",
-      default = NA_real_
+      type = "numeric",
+      default = NA_real_,
+      allow_na = TRUE
     )
   )
 

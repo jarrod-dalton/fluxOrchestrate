@@ -1,7 +1,7 @@
 Package: fluxOrchestrate
 Type: Package
 Title: Multi-model orchestration for flux bundles
-Version: 1.9.0
+Version: 1.10.0
 Author: Jarrod Dalton [aut, cre]
 Maintainer: Jarrod Dalton <daltonj@ccf.org>
 Authors@R: person(given = "Jarrod",
@@ -15,6 +15,6 @@ Description: Add-on orchestration utilities for the flux ecosystem. Provides an
     context transitions implemented as ordinary state updates.
 License: LGPL-3
 Encoding: UTF-8
-Imports: fluxCore (>= 1.9.0)
+Imports: fluxCore (>= 1.10.0)
 Suggests: testthat (>= 3.0.0)
 Config/testthat/edition: 3
