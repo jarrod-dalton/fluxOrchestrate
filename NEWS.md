@@ -1,3 +1,9 @@
+## 1.10.0
+
+- Updated `toy_hospital_bundle` schema to use new fluxCore type system (migrated from "continuous" to "numeric").
+- Added `allow_na` flags to schema fields with missing defaults.
+- Dependency floor updated to `fluxCore (>= 1.10.0)`.
+
 ## 1.9.0
 
 - Coordinated ecosystem release alignment to version 1.9.0.
