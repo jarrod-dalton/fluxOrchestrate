@@ -1,3 +1,12 @@
+#' Strictly merge compatible schemas
+#'
+#' Merges schema definitions and errors on conflicting definitions for the same
+#' variable. Each input schema is validated via [fluxCore::schema_validate()].
+#'
+#' @param ... One or more schemas, or a single list of schemas.
+#'
+#' @return A merged schema list.
+#' @export
 merge_schemas_strict <- function(...) {
   schemas <- list(...)
 

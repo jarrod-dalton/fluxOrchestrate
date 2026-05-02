@@ -1,54 +1,54 @@
-test_that("orchestrated bundle can advance through multiple events with gating", {
+test_that("orchestrated delivery bundle can advance through multiple events with gating", {
   # Helper: retrieve current time in a Core-compatible way
   get_time <- function(entity) {
-    # Time is engine-owned; always use entity$last_time (not part of state()).
     if (is.null(entity$last_time)) return(NA_real_)
     entity$last_time
   }
 
-  hosp <- hospital_toy_bundle(hosp_params = list(admit_wait_mean = 0.5, los_mean = 0.1))
+  # Primary model: pickup/dropoff delivery route.
+  route <- route_toy_bundle(route_params = list(pickup_wait_mean = 0.5, delivery_duration_mean = 0.3))
 
-  # Chronic model proposes clinic visits when outpatient; it should be muted inpatient by policy gating
-  chronic <- list(
-    name = "chronic",
+  # Secondary model: charge battery at depot. Suppressed when on_delivery by policy.
+  charge <- list(
+    name = "charge",
     schema = list(
-      next_clinic = list(type = "continuous", default = NA_real_)
+      battery_pct = list(type = "percent", default = 80, coerce = as.numeric)
     ),
     propose_events = function(entity, ctx = NULL, process_ids = NULL, current_proposals = NULL) {
-      st <- entity$as_list(c("care_mode", "next_clinic"))
-      t_now <- get_time(entity)
-      if (st$care_mode == "inpatient") return(list())
-      t_next <- st$next_clinic
-      if (!is.finite(t_next) || t_next <= t_now) t_next <- t_now + 0.2
-      list(clinic = list(event_type = "clinic", time_next = t_next))
+      t_now <- if (is.null(entity$last_time)) 0 else as.numeric(entity$last_time)
+      list(charge = list(event_type = "charge", time_next = t_now + 0.4))
     },
     transition = function(entity, event, ctx = NULL) {
-      if (event$event_type != "clinic") return(list())
-      t_now <- get_time(entity)
-      list(next_clinic = t_now + 0.2)
+      if (!identical(event$event_type, "charge")) return(list())
+      batt <- as.numeric(entity$as_list("battery_pct")$battery_pct)
+      list(battery_pct = min(100, batt + 10))
     },
     stop = function(entity, event = NULL, ctx = NULL) FALSE
   )
 
   b <- orchestrated_bundle(
-    models = list(hosp = hosp, chronic = chronic),
+    models = list(route = route, charge = charge),
     policy = list(
       eligible_models = function(entity, ctx = NULL) {
-        mode <- entity$as_list("care_mode")$care_mode
-        if (mode == "inpatient") return("hosp")
-        c("hosp", "chronic")
+        status <- entity$as_list("status")$status
+        if (identical(status, "on_delivery")) return("route")
+        c("route", "charge")
       },
       event_priority = function(proposal, entity, ctx = NULL) {
-        if (proposal$event_type %in% c("admit", "discharge")) return(10L)
+        if (proposal$event_type %in% c("pickup", "dropoff")) return(10L)
         200L
       }
     )
   )
 
-  p <- fluxCore::Entity$new(init = list(care_mode = "outpatient"), schema = b$schema, time0 = 0)
+  p <- fluxCore::Entity$new(
+    init   = list(status = "at_depot", payload_kg = 0, deliveries_completed = 0L, battery_pct = 80),
+    schema = b$schema,
+    time0  = 0
+  )
 
-  times <- c()
-  modes <- c()
+  times    <- c()
+  statuses <- c()
 
   for (i in 1:12) {
     props <- b$propose_events(p, current_proposals = NULL)
@@ -68,14 +68,12 @@ test_that("orchestrated bundle can advance through multiple events with gating",
     ev$process_id <- pid_next
 
     upd <- b$transition(p, ev)
-
-    # fluxCore advances time + applies changes via update()
     p$update(time = ev$time_next, event_type = ev$event_type, changes = upd)
 
-    times <- c(times, get_time(p))
-    modes <- c(modes, p$as_list("care_mode")$care_mode)
+    times    <- c(times, get_time(p))
+    statuses <- c(statuses, p$as_list("status")$status)
   }
 
   expect_true(all(diff(times) >= -1e-12))
-  expect_true(any(modes == "inpatient"))
+  expect_true(any(statuses == "on_delivery"))
 })

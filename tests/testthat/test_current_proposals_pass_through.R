@@ -3,7 +3,8 @@ test_that("orchestrator passes current_proposals to submodels by sub_pid", {
   echo_model <- list(
     name = "echo",
     schema = list(
-      care_mode = list(type = "categorical", levels = c("outpatient", "inpatient"), default = "outpatient")
+      status = list(type = "categorical", levels = c("at_depot", "on_delivery"),
+                    default = "at_depot", coerce = as.character)
     ),
     propose_events = function(entity, ctx=NULL, process_ids=NULL, current_proposals=NULL) {
       seen$current <- current_proposals

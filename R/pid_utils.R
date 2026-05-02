@@ -1,3 +1,14 @@
+#' Build a precedence-encoded process ID
+#'
+#' Encodes priority and routing metadata into a stable process ID string used by
+#' orchestrated bundles.
+#'
+#' @param priority Integer priority (lower values sort earlier).
+#' @param model_id Model identifier string.
+#' @param sub_pid Underlying process ID string within the model.
+#'
+#' @return A character scalar process ID in encoded form.
+#' @export
 priority_pid <- function(priority, model_id, sub_pid) {
   stopifnot(length(priority) == 1L, length(model_id) == 1L, length(sub_pid) == 1L)
   priority <- as.integer(priority)
@@ -7,6 +18,14 @@ priority_pid <- function(priority, model_id, sub_pid) {
   sprintf("%06d|%s|%s", priority, model_id, sub_pid)
 }
 
+#' Parse a precedence-encoded process ID
+#'
+#' Decodes an orchestrated process ID back into priority and routing components.
+#'
+#' @param pid Character scalar produced by `priority_pid()`.
+#'
+#' @return A list with components `priority`, `model_id`, and `sub_pid`.
+#' @export
 parse_priority_pid <- function(pid) {
   stopifnot(length(pid) == 1L)
   pid <- as.character(pid)
