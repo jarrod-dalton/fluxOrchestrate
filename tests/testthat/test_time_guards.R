@@ -5,7 +5,8 @@ test_that("orchestrated_bundle rejects calendar time proposals", {
   bad_model <- list(
     name = "bad",
     schema = list(
-      care_mode = list(type = "categorical", levels = c("outpatient", "inpatient"), default = "outpatient")
+      status = list(type = "categorical", levels = c("at_depot", "on_delivery"),
+                    default = "at_depot", coerce = as.character)
     ),
     propose_events = function(entity, ctx = NULL, process_ids = NULL, current_proposals = NULL) {
       list(p = list(event_type = "x", time_next = as.Date("2000-01-01")))

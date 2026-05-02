@@ -1,32 +1,39 @@
-test_that("eligible_models can lock out other models (no propose_events call)", {
+test_that("eligible_models suppresses charge model when courier is on_delivery", {
+  # A model that must never be called when status == 'on_delivery'.
   bad_model <- list(
     name = "bad_model",
     schema = list(
-      care_mode = list(type = "categorical", levels = c("outpatient", "inpatient"), default = "outpatient")
+      status = list(type = "categorical", levels = c("at_depot", "on_delivery"),
+                    default = "at_depot", coerce = as.character)
     ),
-    propose_events = function(entity, ctx=NULL, process_ids=NULL, current_proposals=NULL) {
-      stop("bad_model should not be called")
+    propose_events = function(entity, ctx = NULL, process_ids = NULL, current_proposals = NULL) {
+      stop("bad_model should not be called when on_delivery")
     },
-    transition = function(entity, event, ctx=NULL) list(),
-    stop = function(entity, event=NULL, ctx=NULL) FALSE
+    transition = function(entity, event, ctx = NULL) list(),
+    stop      = function(entity, event = NULL, ctx = NULL) FALSE
   )
 
-  hosp <- hospital_toy_bundle(hosp_params = list(admit_wait_mean = 1, los_mean = 0.1))
+  route <- route_toy_bundle(route_params = list(pickup_wait_mean = 1, delivery_duration_mean = 0.5))
 
   b <- orchestrated_bundle(
-    models = list(hosp = hosp, bad = bad_model),
+    models = list(route = route, bad = bad_model),
     policy = list(
-      eligible_models = function(entity, ctx=NULL) {
-        st <- entity$as_list("care_mode")
-        if (st$care_mode == "inpatient") return("hosp")
-        c("hosp","bad")
+      eligible_models = function(entity, ctx = NULL) {
+        status <- entity$as_list("status")$status
+        if (identical(status, "on_delivery")) return("route")
+        c("route", "bad")
       }
     )
   )
 
-  p <- fluxCore::Entity$new(init = list(care_mode = "inpatient"), schema = b$schema, time0 = 0)
+  # Start on_delivery: bad_model must not fire.
+  p <- fluxCore::Entity$new(
+    init   = list(status = "on_delivery", payload_kg = 5, deliveries_completed = 0L),
+    schema = b$schema,
+    time0  = 0
+  )
 
   props <- b$propose_events(p, ctx = list())
   expect_true(length(props) > 0)
-  expect_true(all(grepl("|hosp|", names(props), fixed = TRUE)))
+  expect_true(all(grepl("|route|", names(props), fixed = TRUE)))
 })
