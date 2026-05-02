@@ -18,4 +18,16 @@ without pulling in orchestration-specific abstractions.
 
 ## Included demo bundle
 
-- `hospital_toy_bundle()` provides a minimal hospitalization episode model for demos and unit tests.
+- `route_toy_bundle()` provides a minimal urban food delivery courier model for demos and unit tests.
+
+---
+
+## Development
+
+`man/` and `NAMESPACE` are **generated** — do not edit them by hand.
+
+To regenerate after changing roxygen comments in `R/`:
+
+```r
+roxygen2::roxygenise(".")
+```

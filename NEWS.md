@@ -1,3 +1,12 @@
+## fluxOrchestrate 1.11.0
+
+- Migrated documentation from manual `.Rd` files to inline roxygen2 comments.
+  `man/` and `NAMESPACE` are now generated artifacts; do not edit by hand.
+- Replaced `hospital_toy_bundle()` with `route_toy_bundle()`: the demo bundle
+  now models an urban food delivery courier (pickup/dropoff events, `at_depot`
+  / `on_delivery` states). Tests reworked to match the new domain.
+- No functional changes to the orchestration API.
+
 ## 1.10.0
 
 - Updated `toy_hospital_bundle` schema to use new fluxCore type system (migrated from "continuous" to "numeric").
