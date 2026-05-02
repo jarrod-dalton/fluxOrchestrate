@@ -11,6 +11,16 @@
 #   The canonical time reference is `entity$last_time`.
 # ------------------------------------------------------------------------------
 
+#' Create a toy hospital episode model bundle
+#'
+#' Returns a minimal demonstration bundle that alternates between outpatient and
+#' inpatient care modes using admission/discharge events.
+#'
+#' @param hosp_params Optional list of toy parameters. Defaults include
+#'   `admit_wait_mean` and `los_mean`.
+#'
+#' @return A model bundle list with schema, propose/transition/stop functions.
+#' @export
 hospital_toy_bundle <- function(hosp_params = NULL) {
   if (is.null(hosp_params)) hosp_params <- list(admit_wait_mean = 1.0, los_mean = 0.05)
 

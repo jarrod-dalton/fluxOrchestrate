@@ -1,3 +1,17 @@
+#' Compose multiple model bundles into a single orchestrated bundle
+#'
+#' Builds an orchestration-layer bundle that routes proposals and transitions to
+#' underlying model bundles, applies priority-based process IDs, and supports
+#' cross-model policy hooks.
+#'
+#' @param models Named list of model bundles to orchestrate.
+#' @param policy Optional list overriding orchestration hooks such as
+#'   `eligible_models`, `event_priority`, `on_transition`, and `stop`.
+#' @param schema Optional pre-merged schema. If `NULL`, schemas are merged from
+#'   model bundle schemas.
+#'
+#' @return A model bundle list compatible with `fluxCore::Engine`.
+#' @export
 orchestrated_bundle <- function(models,
                                policy = NULL,
                                schema = NULL) {
