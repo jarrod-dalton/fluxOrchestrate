@@ -14,27 +14,27 @@ test_that("orchestrated delivery bundle can advance through multiple events with
     schema = list(
       battery_pct = list(type = "percent", default = 80, coerce = as.numeric)
     ),
-    propose_events = function(entity, ctx = NULL, process_ids = NULL, current_proposals = NULL) {
+    propose_events = function(entity, sim_ctx = NULL, param_ctx = NULL, process_ids = NULL, current_proposals = NULL) {
       t_now <- if (is.null(entity$last_time)) 0 else as.numeric(entity$last_time)
       list(charge = list(event_type = "charge", time_next = t_now + 0.4))
     },
-    transition = function(entity, event, ctx = NULL) {
+    transition = function(entity, event, sim_ctx = NULL, param_ctx = NULL) {
       if (!identical(event$event_type, "charge")) return(list())
       batt <- as.numeric(entity$as_list("battery_pct")$battery_pct)
       list(battery_pct = min(100, batt + 10))
     },
-    stop = function(entity, event = NULL, ctx = NULL) FALSE
+    stop = function(entity, event = NULL, sim_ctx = NULL, param_ctx = NULL) FALSE
   )
 
   b <- orchestrated_bundle(
     models = list(route = route, charge = charge),
     policy = list(
-      eligible_models = function(entity, ctx = NULL) {
+      eligible_models = function(entity, sim_ctx = NULL, param_ctx = NULL) {
         status <- entity$as_list("status")$status
         if (identical(status, "on_delivery")) return("route")
         c("route", "charge")
       },
-      event_priority = function(proposal, entity, ctx = NULL) {
+      event_priority = function(proposal, entity, sim_ctx = NULL, param_ctx = NULL) {
         if (proposal$event_type %in% c("pickup", "dropoff")) return(10L)
         200L
       }

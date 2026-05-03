@@ -8,7 +8,7 @@ test_that("route toy bundle proposals are not before entity$last_time", {
   )
   p$update(time = 0.2, event_type = "INIT", changes = list())
 
-  evs <- bundle$propose_events(p, ctx = list(), process_ids = NULL, current_proposals = NULL)
+  evs <- bundle$propose_events(p, sim_ctx = NULL, param_ctx = NULL, process_ids = NULL, current_proposals = NULL)
   expect_true(length(evs) >= 1)
 
   for (ev in evs) {

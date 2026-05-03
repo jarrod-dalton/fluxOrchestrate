@@ -6,20 +6,20 @@ test_that("orchestrator passes current_proposals to submodels by sub_pid", {
       status = list(type = "categorical", levels = c("at_depot", "on_delivery"),
                     default = "at_depot", coerce = as.character)
     ),
-    propose_events = function(entity, ctx=NULL, process_ids=NULL, current_proposals=NULL) {
+    propose_events = function(entity, sim_ctx=NULL, param_ctx=NULL, process_ids=NULL, current_proposals=NULL) {
       seen$current <- current_proposals
       if (!is.null(current_proposals) && !is.null(current_proposals[["p"]])) {
         return(list(p = current_proposals[["p"]]))
       }
       list(p = list(event_type="x", time_next = 1))
     },
-    transition = function(entity, event, ctx=NULL) list(),
-    stop = function(entity, event=NULL, ctx=NULL) FALSE
+    transition = function(entity, event, sim_ctx=NULL, param_ctx=NULL) list(),
+    stop = function(entity, event=NULL, sim_ctx=NULL, param_ctx=NULL) FALSE
   )
 
   b <- orchestrated_bundle(
     models = list(echo = echo_model),
-    policy = list(event_priority = function(proposal, entity, ctx=NULL) 123L)
+    policy = list(event_priority = function(proposal, entity, sim_ctx=NULL, param_ctx=NULL) 123L)
   )
 
   p <- fluxCore::Entity$new(init = list(), schema = b$schema, time0 = 0)
