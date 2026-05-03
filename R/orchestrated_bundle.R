@@ -20,10 +20,10 @@ orchestrated_bundle <- function(models,
   }
 
   pol_default <- list(
-    eligible_models = function(entity, ctx = NULL) names(models),
-    event_priority  = function(proposal, entity, ctx = NULL) 500L,
-    on_transition   = function(event, entity, ctx = NULL, model_changes) list(),
-    stop            = function(entity, event = NULL, ctx = NULL, per_model_stop = NULL) {
+    eligible_models = function(entity, sim_ctx = NULL, param_ctx = NULL) names(models),
+    event_priority  = function(proposal, entity, sim_ctx = NULL, param_ctx = NULL) 500L,
+    on_transition   = function(event, entity, sim_ctx = NULL, param_ctx = NULL, model_changes) list(),
+    stop            = function(entity, event = NULL, sim_ctx = NULL, param_ctx = NULL, per_model_stop = NULL) {
       if (is.null(per_model_stop)) return(FALSE)
       eligible <- names(per_model_stop)
       if (!length(eligible)) return(FALSE)
@@ -83,11 +83,11 @@ orchestrated_bundle <- function(models,
     prop
   }
 
-  propose_events <- function(entity, ctx = NULL, process_ids = NULL, current_proposals = NULL) {
+  propose_events <- function(entity, sim_ctx = NULL, param_ctx = NULL, process_ids = NULL, current_proposals = NULL) {
     # Orchestration operates strictly on numeric model time.
-    .pso_assert_numeric_scalar(entity$last_time, name = "entity$last_time", ctx = ctx)
+    .pso_assert_numeric_scalar(entity$last_time, name = "entity$last_time", sim_ctx = sim_ctx)
 
-    eligible <- pol$eligible_models(entity, ctx)
+    eligible <- pol$eligible_models(entity, sim_ctx, param_ctx)
     eligible <- intersect(eligible, names(models))
     if (!length(eligible)) return(list())
 
@@ -103,7 +103,8 @@ orchestrated_bundle <- function(models,
 
       props <- b$propose_events(
         entity = entity,
-        ctx = ctx,
+        sim_ctx = sim_ctx,
+        param_ctx = param_ctx,
         process_ids = sub_pids,
         current_proposals = sub_current
       )
@@ -111,8 +112,8 @@ orchestrated_bundle <- function(models,
 
       for (spid in names(props)) {
         p <- props[[spid]]
-        .pso_assert_proposal_time_next(p, ctx = ctx)
-        pr <- pol$event_priority(p, entity, ctx)
+        .pso_assert_proposal_time_next(p, sim_ctx = sim_ctx)
+        pr <- pol$event_priority(p, entity, sim_ctx, param_ctx)
         orch_pid <- priority_pid(pr, mid, spid)
         out[[orch_pid]] <- add_meta(p, orch_pid, mid, spid, pr)
       }
@@ -121,7 +122,7 @@ orchestrated_bundle <- function(models,
     out
   }
 
-  transition <- function(entity, event, ctx = NULL) {
+  transition <- function(entity, event, sim_ctx = NULL, param_ctx = NULL) {
     mid <- event$model_id
     spid <- event$sub_pid
     if (is.null(mid) || is.null(spid)) {
@@ -140,27 +141,27 @@ orchestrated_bundle <- function(models,
 
     model_changes <- list()
     if (!is.null(b$transition)) {
-      model_changes <- b$transition(entity = entity, event = event, ctx = ctx)
+      model_changes <- b$transition(entity = entity, event = event, sim_ctx = sim_ctx, param_ctx = param_ctx)
       if (is.null(model_changes)) model_changes <- list()
     }
 
-    extra <- pol$on_transition(event, entity, ctx, model_changes)
+    extra <- pol$on_transition(event, entity, sim_ctx, param_ctx, model_changes)
     if (is.null(extra)) extra <- list()
 
     c(model_changes, extra)
   }
 
-  stop <- function(entity, event = NULL, ctx = NULL) {
-    eligible <- pol$eligible_models(entity, ctx)
+  stop <- function(entity, event = NULL, sim_ctx = NULL, param_ctx = NULL) {
+    eligible <- pol$eligible_models(entity, sim_ctx, param_ctx)
     eligible <- intersect(eligible, names(models))
 
     per_model <- list()
     for (mid in eligible) {
       b <- models[[mid]]
-      per_model[[mid]] <- if (!is.null(b$stop)) isTRUE(b$stop(entity = entity, event = event, ctx = ctx)) else FALSE
+      per_model[[mid]] <- if (!is.null(b$stop)) isTRUE(b$stop(entity = entity, event = event, sim_ctx = sim_ctx, param_ctx = param_ctx)) else FALSE
     }
 
-    isTRUE(pol$stop(entity, event, ctx, per_model))
+    isTRUE(pol$stop(entity, event, sim_ctx, param_ctx, per_model))
   }
 
   list(

@@ -53,17 +53,17 @@ route_toy_bundle <- function(route_params = NULL) {
     )
   )
 
-  propose_events <- function(entity, ctx = NULL, process_ids = NULL, current_proposals = NULL) {
+  propose_events <- function(entity, sim_ctx = NULL, param_ctx = NULL, process_ids = NULL, current_proposals = NULL) {
     st <- entity$as_list("status")
     t_now <- if (is.null(entity$last_time)) 0 else as.numeric(entity$last_time)
     status <- st$status
 
     want_pid <- function(pid) is.null(process_ids) || pid %in% process_ids
 
-    # Allow ctx to override parameters (e.g. for tests).
+    # Use param_ctx if available; param_ctx should contain route_params.
     params <- route_params
-    if (!is.null(ctx) && is.list(ctx) && !is.null(ctx$route_params)) {
-      params <- utils::modifyList(params, ctx$route_params)
+    if (!is.null(param_ctx) && is.list(param_ctx) && !is.null(param_ctx$route_params)) {
+      params <- utils::modifyList(params, param_ctx$route_params)
     }
 
     if (identical(status, "at_depot")) {
@@ -77,7 +77,7 @@ route_toy_bundle <- function(route_params = NULL) {
     }
   }
 
-  transition <- function(entity, event, ctx = NULL) {
+  transition <- function(entity, event, sim_ctx = NULL, param_ctx = NULL) {
     if (identical(event$event_type, "pickup")) {
       list(
         status     = "on_delivery",
@@ -95,7 +95,7 @@ route_toy_bundle <- function(route_params = NULL) {
     }
   }
 
-  stop <- function(entity, event = NULL, ctx = NULL) FALSE
+  stop <- function(entity, event = NULL, sim_ctx = NULL, param_ctx = NULL) FALSE
 
   list(
     name          = "route",
