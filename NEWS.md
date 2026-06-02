@@ -1,3 +1,12 @@
+## fluxOrchestrate 2.0.0
+
+- Ecosystem alignment to fluxCore 2.0.0.
+- Dependency floor updated to `fluxCore (>= 2.0.0)`.
+- Orchestrated bundles compose cleanly with fluxCore's `DecisionPoint` dispatch:
+  a merged schema produced by `orchestrated_bundle()` may include
+  `decision_points`, and the Engine handles policy callbacks transparently.
+- No functional changes to the orchestration API.
+
 ## fluxOrchestrate 1.11.0
 
 - Migrated documentation from manual `.Rd` files to inline roxygen2 comments.
