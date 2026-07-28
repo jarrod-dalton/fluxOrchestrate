@@ -1,6 +1,5 @@
 # fluxOrchestrate
 [![Release](https://img.shields.io/github/v/release/jarrod-dalton/fluxOrchestrate?display_name=tag)](https://github.com/jarrod-dalton/fluxOrchestrate/releases)
-[![r-universe](https://jarrod-dalton.r-universe.dev/badges/fluxOrchestrate)](https://jarrod-dalton.r-universe.dev/fluxOrchestrate)
 [![License: LGPL-3](https://img.shields.io/badge/license-LGPL--3-blue.svg)](https://www.gnu.org/licenses/lgpl-3.0)
 [![Language: R](https://img.shields.io/badge/language-R-276DC3?logo=r&logoColor=white)](https://www.r-project.org/)
 
@@ -8,11 +7,9 @@ Add-on multi-model orchestration for the **flux** ecosystem.
 
 ## Installation
 
-```r
-# Latest stable release (recommended):
-install.packages("fluxOrchestrate", repos = "https://jarrod-dalton.r-universe.dev")
+Install the latest source version from GitHub:
 
-# Pre-release install from source code:
+```r
 remotes::install_github("jarrod-dalton/fluxOrchestrate")
 ```
 
