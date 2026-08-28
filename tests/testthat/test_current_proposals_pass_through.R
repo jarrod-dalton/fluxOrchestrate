@@ -2,6 +2,7 @@ test_that("orchestrator passes current_proposals to submodels by sub_pid", {
   seen <- new.env(parent = emptyenv())
   echo_model <- list(
     name = "echo",
+    time_spec = fluxCore::time_spec(unit = "hours"),
     schema = list(
       status = list(type = "categorical", levels = c("at_depot", "on_delivery"),
                     default = "at_depot", coerce = as.character)

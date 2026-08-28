@@ -1,3 +1,15 @@
+## fluxOrchestrate 2.1.0
+
+- Orchestrated bundles now carry one canonical fluxCore `time_spec`. Every
+  constituent bundle must declare a semantically matching clock; missing or
+  conflicting unit, origin, origin class, or zone values fail at assembly.
+- The urban-delivery toy bundle now declares its hours clock, reads parameter
+  overrides from typed `ParamContext$params`, and runs directly through
+  `fluxCore::Engine`.
+- Orchestration continues to merge variable schemas only. Assemble any complete
+  decision/group schema separately through `fluxCore::load_model()`; this release
+  does not add decision-schema composition.
+
 ## fluxOrchestrate 2.0.0
 
 - Ecosystem alignment to fluxCore 2.0.0.

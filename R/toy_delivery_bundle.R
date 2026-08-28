@@ -26,8 +26,9 @@
 #'   - `pickup_wait_mean`: mean hours waiting at depot before next pickup (default `1.0`)
 #'   - `delivery_duration_mean`: mean delivery duration in hours (default `0.5`)
 #'
-#' @return A model bundle list with `schema`, `propose_events`, `transition`,
-#'   and `stop` functions, compatible with `fluxCore::Engine`.
+#' @return A model bundle list with an hours-based `time_spec`, `schema`,
+#'   `propose_events`, `transition`, and `stop` functions, compatible with
+#'   `fluxCore::Engine`.
 #' @export
 route_toy_bundle <- function(route_params = NULL) {
   if (is.null(route_params)) {
@@ -60,10 +61,10 @@ route_toy_bundle <- function(route_params = NULL) {
 
     want_pid <- function(pid) is.null(process_ids) || pid %in% process_ids
 
-    # Use param_ctx if available; param_ctx should contain route_params.
+    # Typed ParamContext payloads override matching route parameters.
     params <- route_params
-    if (!is.null(param_ctx) && is.list(param_ctx) && !is.null(param_ctx$route_params)) {
-      params <- utils::modifyList(params, param_ctx$route_params)
+    if (!is.null(param_ctx) && is.list(param_ctx) && !is.null(param_ctx$params)) {
+      params <- utils::modifyList(params, param_ctx$params)
     }
 
     if (identical(status, "at_depot")) {
@@ -99,6 +100,7 @@ route_toy_bundle <- function(route_params = NULL) {
 
   list(
     name          = "route",
+    time_spec     = fluxCore::time_spec(unit = "hours"),
     schema        = schema,
     propose_events = propose_events,
     transition    = transition,

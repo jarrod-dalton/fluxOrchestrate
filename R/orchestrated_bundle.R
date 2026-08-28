@@ -4,19 +4,59 @@
 #' underlying model bundles, applies priority-based process IDs, and supports
 #' cross-model policy hooks.
 #'
-#' @param models Named list of model bundles to orchestrate.
+#' @param models Named list of model bundles to orchestrate. Each bundle must
+#'   declare the same canonical `time_spec`.
 #' @param policy Optional list overriding orchestration hooks such as
 #'   `eligible_models`, `event_priority`, `on_transition`, and `stop`.
 #' @param schema Optional pre-merged schema. If `NULL`, schemas are merged from
 #'   model bundle schemas.
 #'
-#' @return A model bundle list compatible with `fluxCore::Engine`.
+#' @return A model bundle list carrying the shared `time_spec` and compatible
+#'   with `fluxCore::Engine`.
 #' @export
 orchestrated_bundle <- function(models,
                                policy = NULL,
                                schema = NULL) {
-  if (!is.list(models) || is.null(names(models)) || any(names(models) == "")) {
-    stop("models must be a named list of bundles.")
+  if (!is.list(models) || length(models) == 0L ||
+      is.null(names(models)) || any(names(models) == "")) {
+    stop("models must be a non-empty named list of bundles.")
+  }
+
+  model_time_specs <- lapply(models, function(bundle) {
+    if (!is.list(bundle)) return(NULL)
+    bundle$time_spec
+  })
+  invalid_time_specs <- names(models)[!vapply(
+    model_time_specs,
+    inherits,
+    logical(1),
+    what = "time_spec"
+  )]
+  if (length(invalid_time_specs) > 0L) {
+    stop(
+      sprintf(
+        "Every model bundle must define `$time_spec` as a fluxCore `time_spec` object; missing or invalid for: %s.",
+        paste(invalid_time_specs, collapse = ", ")
+      ),
+      call. = FALSE
+    )
+  }
+
+  time_spec <- model_time_specs[[1L]]
+  mismatched_time_specs <- names(models)[!vapply(
+    model_time_specs,
+    .pso_time_spec_equal,
+    logical(1),
+    y = time_spec
+  )]
+  if (length(mismatched_time_specs) > 0L) {
+    stop(
+      sprintf(
+        "All model bundles must use the same canonical `time_spec`; mismatch for: %s.",
+        paste(mismatched_time_specs, collapse = ", ")
+      ),
+      call. = FALSE
+    )
   }
 
   pol_default <- list(
@@ -166,6 +206,7 @@ orchestrated_bundle <- function(models,
 
   list(
     name = "orchestrated_bundle",
+    time_spec = time_spec,
     schema = schema,
     propose_events = propose_events,
     transition = transition,

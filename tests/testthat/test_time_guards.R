@@ -4,6 +4,7 @@ library(fluxOrchestrate)
 test_that("orchestrated_bundle rejects calendar time proposals", {
   bad_model <- list(
     name = "bad",
+    time_spec = fluxCore::time_spec(unit = "hours"),
     schema = list(
       status = list(type = "categorical", levels = c("at_depot", "on_delivery"),
                     default = "at_depot", coerce = as.character)
@@ -20,8 +21,26 @@ test_that("orchestrated_bundle rejects calendar time proposals", {
   p <- fluxCore::Entity$new(init = list(), schema = b$schema, time0 = 0)
 
   expect_error(
-    b$propose_events(p, sim_ctx = list(time = list(unit = "days"))),
-    "Calendar time inputs are out of scope",
+    b$propose_events(
+      p,
+      sim_ctx = fluxCore::SimContext(
+        run_id = "time-guard",
+        time_spec = fluxCore::time_spec(unit = "hours")
+      )
+    ),
+    "Calendar time inputs are out of scope for fluxOrchestrate",
+    fixed = TRUE
+  )
+
+  expect_error(
+    b$propose_events(
+      p,
+      sim_ctx = fluxCore::SimContext(
+        run_id = "time-guard-unit",
+        time_spec = fluxCore::time_spec(unit = "hours")
+      )
+    ),
+    "unit: 'hours'",
     fixed = TRUE
   )
 })

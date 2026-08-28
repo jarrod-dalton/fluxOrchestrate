@@ -11,6 +11,7 @@ test_that("orchestrated delivery bundle can advance through multiple events with
   # Secondary model: charge battery at depot. Suppressed when on_delivery by policy.
   charge <- list(
     name = "charge",
+    time_spec = fluxCore::time_spec(unit = "hours"),
     schema = list(
       battery_pct = list(type = "percent", default = 80, coerce = as.numeric)
     ),

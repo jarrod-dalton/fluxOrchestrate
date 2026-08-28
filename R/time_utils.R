@@ -3,11 +3,25 @@
 # ------------------------------------------------------------------------------
 
 .pso_time_unit_label <- function(sim_ctx = NULL) {
-  if (!is.null(sim_ctx) && is.list(sim_ctx) && !is.null(sim_ctx$time) && is.list(sim_ctx$time)) {
-    u <- sim_ctx$time$unit
+  if (!is.null(sim_ctx) && is.list(sim_ctx) &&
+      !is.null(sim_ctx$time_spec) && is.list(sim_ctx$time_spec)) {
+    u <- sim_ctx$time_spec$unit
     if (is.character(u) && length(u) == 1L && nzchar(u)) return(as.character(u))
   }
   "unitless"
+}
+
+.pso_time_spec_equal <- function(x, y) {
+  if (!inherits(x, "time_spec") || !inherits(y, "time_spec")) return(FALSE)
+
+  identical(x$unit, y$unit) &&
+    identical(x$origin_class, y$origin_class) &&
+    identical(x$zone, y$zone) &&
+    isTRUE(all.equal(
+      as.numeric(x$origin_posix),
+      as.numeric(y$origin_posix),
+      tolerance = 0
+    ))
 }
 
 .pso_assert_numeric_scalar <- function(x, name, sim_ctx = NULL) {

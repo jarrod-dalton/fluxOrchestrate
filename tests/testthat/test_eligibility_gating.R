@@ -2,6 +2,7 @@ test_that("eligible_models suppresses charge model when courier is on_delivery",
   # A model that must never be called when status == 'on_delivery'.
   bad_model <- list(
     name = "bad_model",
+    time_spec = fluxCore::time_spec(unit = "hours"),
     schema = list(
       status = list(type = "categorical", levels = c("at_depot", "on_delivery"),
                     default = "at_depot", coerce = as.character)

@@ -14,8 +14,9 @@ route_toy_bundle(route_params = NULL)
 }}
 }
 \value{
-A model bundle list with \code{schema}, \code{propose_events}, \code{transition},
-and \code{stop} functions, compatible with \code{fluxCore::Engine}.
+A model bundle list with an hours-based \code{time_spec}, \code{schema},
+\code{propose_events}, \code{transition}, and \code{stop} functions, compatible with
+\code{fluxCore::Engine}.
 }
 \description{
 Returns a minimal demonstration bundle for an urban food courier that

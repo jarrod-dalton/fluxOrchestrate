@@ -7,7 +7,8 @@
 orchestrated_bundle(models, policy = NULL, schema = NULL)
 }
 \arguments{
-\item{models}{Named list of model bundles to orchestrate.}
+\item{models}{Named list of model bundles to orchestrate. Each bundle must
+declare the same canonical \code{time_spec}.}
 
 \item{policy}{Optional list overriding orchestration hooks such as
 \code{eligible_models}, \code{event_priority}, \code{on_transition}, and \code{stop}.}
@@ -16,7 +17,8 @@ orchestrated_bundle(models, policy = NULL, schema = NULL)
 model bundle schemas.}
 }
 \value{
-A model bundle list compatible with \code{fluxCore::Engine}.
+A model bundle list carrying the shared \code{time_spec} and compatible
+with \code{fluxCore::Engine}.
 }
 \description{
 Builds an orchestration-layer bundle that routes proposals and transitions to
